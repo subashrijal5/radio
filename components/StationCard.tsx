@@ -1,56 +1,80 @@
-import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
-import { useRadioStore, Station } from '../store/radioStore';
-import { useColorScheme } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
+import { useRadioStore, Station } from "../store/radioStore";
+import { Ionicons } from "@expo/vector-icons";
+import { useAudio } from "@/hooks/useAudio";
+import { useThemeStore } from "@/store/themeStore";
 
 interface StationCardProps {
   station: Station;
 }
 
 export default function StationCard({ station }: StationCardProps) {
-  const { currentStation, isPlaying, toggleFavorite, favorites, playStation, stopPlayback } = useRadioStore();
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
+  const {
+    currentStation,
+    isPlaying,
+    favorites,
+    toggleFavorite,
+    setCurrentStation,
+    setIsPlaying,
+    setVolume,
+    volume,
+    addToRecentlyPlayed,
+  } = useRadioStore();
+  const { playAudio, stopAudio } = useAudio();
+
+  const { theme } = useThemeStore();
+  const isDark = theme === "dark";
 
   const isFavorite = favorites.some((s) => s.id === station.id);
   const isCurrentStation = currentStation?.id === station.id;
 
   const handlePlayPress = async () => {
     if (isCurrentStation && isPlaying) {
-      await stopPlayback();
+      const state = await stopAudio();
+      setIsPlaying(state.isPlaying);
+      setVolume(state.volume);
     } else {
-      await playStation(station);
+      setCurrentStation(station);
+      const state = await playAudio(station.url, volume);
+      if (state.isPlaying) {
+        setIsPlaying(state.isPlaying);
+        setVolume(state.volume);
+        addToRecentlyPlayed(station);
+      }
     }
   };
 
   return (
-    <View style={[styles.card, { backgroundColor: isDark ? '#2a2a2a' : '#ffffff' }]}>
+    <View
+      style={[styles.card, { backgroundColor: isDark ? "#2a2a2a" : "#ffffff" }]}
+    >
       <Image source={{ uri: station.logo }} style={styles.logo} />
       <View style={styles.info}>
-        <Text style={[styles.name, { color: isDark ? '#ffffff' : '#000000' }]}>
+        <Text style={[styles.name, { color: isDark ? "#ffffff" : "#000000" }]}>
           {station.name}
         </Text>
-        <Text style={[styles.genre, { color: isDark ? '#888888' : '#666666' }]}>
-          {station.genre.join(', ')}
+        <Text style={[styles.genre, { color: isDark ? "#888888" : "#666666" }]}>
+          {station.genre.join(", ")}
         </Text>
-        <Text style={[styles.details, { color: isDark ? '#888888' : '#666666' }]}>
+        <Text
+          style={[styles.details, { color: isDark ? "#888888" : "#666666" }]}
+        >
           {station.country} • {station.language}
         </Text>
       </View>
       <View style={styles.controls}>
         <TouchableOpacity
           onPress={() => toggleFavorite(station)}
-          style={styles.button}>
+          style={styles.button}
+        >
           <Ionicons
             name="heart"
             size={24}
-            color={isFavorite ? '#ff2d55' : isDark ? '#888888' : '#666666'}
-            fill={isFavorite ? '#ff2d55' : 'none'}
+            color={isFavorite ? "#ff2d55" : isDark ? "#888888" : "#666666"}
+            fill={isFavorite ? "#ff2d55" : "none"}
           />
         </TouchableOpacity>
-        <TouchableOpacity
-          onPress={handlePlayPress}
-          style={styles.button}>
+        <TouchableOpacity onPress={handlePlayPress} style={styles.button}>
           {isCurrentStation && isPlaying ? (
             <Ionicons name="pause" size={24} color="#007AFF" />
           ) : (
@@ -64,12 +88,12 @@ export default function StationCard({ station }: StationCardProps) {
 
 const styles = StyleSheet.create({
   card: {
-    flexDirection: 'row',
+    flexDirection: "row",
     padding: 12,
     marginHorizontal: 16,
     marginVertical: 8,
     borderRadius: 12,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -83,11 +107,11 @@ const styles = StyleSheet.create({
   info: {
     flex: 1,
     marginLeft: 12,
-    justifyContent: 'center',
+    justifyContent: "center",
   },
   name: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
     marginBottom: 4,
   },
   genre: {
@@ -98,8 +122,8 @@ const styles = StyleSheet.create({
     fontSize: 12,
   },
   controls: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   button: {
     padding: 8,

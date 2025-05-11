@@ -1,28 +1,34 @@
 import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import { useRadioStore } from '../store/radioStore';
-import { useColorScheme } from 'react-native';
 import { BlurView } from 'expo-blur';
 import Slider from '@react-native-community/slider';
 import { Ionicons } from "@expo/vector-icons";
+import { useAudio } from '@/hooks/useAudio';
+import { useThemeStore } from '@/store/themeStore';
 
 export default function Player() {
-  const { currentStation, isPlaying, stopPlayback, playStation, volume, setVolume } = useRadioStore();
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
+  const { currentStation, isPlaying, volume, setVolume, setIsPlaying } = useRadioStore();
+  const { playAudio, stopAudio, setAudioVolume } = useAudio();
+  const { theme } = useThemeStore();
+  const isDark = theme === 'dark';
 
   if (!currentStation) return null;
 
   const handlePlayPause = async () => {
     if (isPlaying) {
-      await stopPlayback();
+      const state = await stopAudio();
+      setIsPlaying(state.isPlaying);
+      setVolume(state.volume);
     } else {
-      await playStation(currentStation);
+      const state = await playAudio(currentStation.url, volume);
+      setIsPlaying(state.isPlaying);
+      setVolume(state.volume);
     }
   };
 
   return (
     <BlurView
-      intensity={80}
+      intensity={200}
       tint={isDark ? 'dark' : 'light'}
       style={styles.container}>
       <Image source={{ uri: currentStation.logo }} style={styles.logo} />
@@ -45,7 +51,11 @@ export default function Player() {
           </TouchableOpacity>
           <Slider
             style={styles.slider}
-            onValueChange={setVolume}
+            value={volume}
+            onValueChange={async (value) => {
+              const state = await setAudioVolume(value);
+              setVolume(state.volume);
+            }}
             minimumValue={0}
             maximumValue={1}
             minimumTrackTintColor="#007AFF"

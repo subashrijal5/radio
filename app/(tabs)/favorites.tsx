@@ -1,12 +1,12 @@
 import { View, Text, FlatList, StyleSheet } from 'react-native';
 import { useRadioStore } from '../../store/radioStore';
 import StationCard from '../../components/StationCard';
-import { useColorScheme } from 'react-native';
+import { useThemeStore } from '../../store/themeStore';
 
 export default function FavoritesScreen() {
   const { favorites } = useRadioStore();
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
+  const { theme } = useThemeStore();
+  const isDark = theme === 'dark';
 
   return (
     <View style={[styles.container, { backgroundColor: isDark ? '#000000' : '#f2f2f7' }]}>
@@ -23,7 +23,7 @@ export default function FavoritesScreen() {
         <FlatList
           data={favorites}
           renderItem={({ item }) => <StationCard station={item} />}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => item.id.toString()}
           contentContainerStyle={styles.list}
         />
       )}

@@ -1,41 +1,82 @@
-import { View, Text, StyleSheet, Switch, TouchableOpacity, useColorScheme } from 'react-native';
-import { useRadioStore } from '../../store/radioStore';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Switch,
+  TouchableOpacity,
+  useColorScheme,
+} from "react-native";
+import { useThemeStore } from "../../store/themeStore";
 import { Ionicons } from "@expo/vector-icons";
 
 export default function SettingsScreen() {
-  const { volume, setVolume } = useRadioStore();
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
+  const { theme, setTheme } = useThemeStore();
+  const systemColorScheme = useColorScheme();
+  const isDark =
+    theme === "system" ? systemColorScheme === "dark" : theme === "dark";
 
   const settingsItems = [
     {
-      icon: isDark ? <Ionicons name="sunny-outline" size={24} color="#ffffff" /> : <Ionicons name="moon-outline" size={24} color="#000000" />,
-      title: 'Dark Mode',
-      value: isDark,
-      description: 'System',
+      icon: isDark ? (
+        <Ionicons name="sunny-outline" size={24} color="#ffffff" />
+      ) : (
+        <Ionicons name="moon-outline" size={24} color="#000000" />
+      ),
+      title: "Dark Mode",
+      value: theme === "dark",
+      description:
+        theme === "system" ? "System" : theme === "dark" ? "On" : "Off",
+      onPress: () => {
+        if (theme === "system") setTheme("dark");
+        else if (theme === "dark") setTheme("light");
+        else setTheme("system");
+      },
     },
     {
-      icon: <Ionicons name="volume-high-outline" size={24} color={isDark ? '#ffffff' : '#000000'} />,
-      title: 'Sound Quality',
-      value: 'High',
-      description: 'Uses more data',
+      icon: (
+        <Ionicons
+          name="volume-high-outline"
+          size={24}
+          color={isDark ? "#ffffff" : "#000000"}
+        />
+      ),
+      title: "Sound Quality",
+      value: "High",
+      description: "Uses more data",
     },
     {
-      icon: <Ionicons name="timer-outline" size={24} color={isDark ? '#ffffff' : '#000000'} />,
-      title: 'Sleep Timer',
-      value: 'Off',
-      description: 'Stop playback after set time',
+      icon: (
+        <Ionicons
+          name="timer-outline"
+          size={24}
+          color={isDark ? "#ffffff" : "#000000"}
+        />
+      ),
+      title: "Sleep Timer",
+      value: "Off",
+      description: "Stop playback after set time",
     },
     {
-      icon: <Ionicons name="share-outline" size={24} color={isDark ? '#ffffff' : '#000000'} />,
-      title: 'Share App',
-      description: 'Tell your friends about us',
+      icon: (
+        <Ionicons
+          name="share-outline"
+          size={24}
+          color={isDark ? "#ffffff" : "#000000"}
+        />
+      ),
+      title: "Share App",
+      description: "Tell your friends about us",
     },
   ];
 
   return (
-    <View style={[styles.container, { backgroundColor: isDark ? '#000000' : '#f2f2f7' }]}>
-      <Text style={[styles.title, { color: isDark ? '#ffffff' : '#000000' }]}>
+    <View
+      style={[
+        styles.container,
+        { backgroundColor: isDark ? "#000000" : "#f2f2f7" },
+      ]}
+    >
+      <Text style={[styles.title, { color: isDark ? "#ffffff" : "#000000" }]}>
         Settings
       </Text>
       <View style={styles.settingsList}>
@@ -44,24 +85,43 @@ export default function SettingsScreen() {
             key={item.title}
             style={[
               styles.settingItem,
-              { backgroundColor: isDark ? '#1c1c1e' : '#ffffff' },
+              { backgroundColor: isDark ? "#1c1c1e" : "#ffffff" },
               index === 0 && styles.firstItem,
               index === settingsItems.length - 1 && styles.lastItem,
-            ]}>
+            ]}
+          >
             <View style={styles.settingContent}>
               <View style={styles.settingIcon}>{item.icon}</View>
               <View style={styles.settingText}>
-                <Text style={[styles.settingTitle, { color: isDark ? '#ffffff' : '#000000' }]}>
+                <Text
+                  style={[
+                    styles.settingTitle,
+                    { color: isDark ? "#ffffff" : "#000000" },
+                  ]}
+                >
                   {item.title}
                 </Text>
-                <Text style={[styles.settingDescription, { color: isDark ? '#888888' : '#666666' }]}>
+                <Text
+                  style={[
+                    styles.settingDescription,
+                    { color: isDark ? "#888888" : "#666666" },
+                  ]}
+                >
                   {item.description}
                 </Text>
               </View>
-              {typeof item.value === 'boolean' ? (
-                <Switch value={item.value} />
+              {typeof item.value === "boolean" ? (
+                <Switch
+                  value={item.value}
+                  onValueChange={() => item.onPress?.()}
+                />
               ) : item.value ? (
-                <Text style={[styles.settingValue, { color: isDark ? '#888888' : '#666666' }]}>
+                <Text
+                  style={[
+                    styles.settingValue,
+                    { color: isDark ? "#888888" : "#666666" },
+                  ]}
+                >
                   {item.value}
                 </Text>
               ) : null}
@@ -80,7 +140,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 28,
-    fontWeight: '700',
+    fontWeight: "700",
     marginBottom: 20,
     paddingHorizontal: 16,
   },
@@ -101,8 +161,8 @@ const styles = StyleSheet.create({
     marginBottom: 0,
   },
   settingContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     padding: 16,
   },
   settingIcon: {
@@ -113,7 +173,7 @@ const styles = StyleSheet.create({
   },
   settingTitle: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
     marginBottom: 4,
   },
   settingDescription: {
