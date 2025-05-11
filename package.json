@@ -18,7 +18,6 @@
     "@react-navigation/bottom-tabs": "^7.3.10",
     "@react-navigation/native": "^7.1.6",
     "expo": "^53.0.9",
-    "expo-audio": "~0.4.4",
     "expo-blur": "~14.1.4",
     "expo-constants": "~17.1.6",
     "expo-dev-client": "~5.1.8",
