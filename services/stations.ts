@@ -11,7 +11,7 @@ export const stations = [
   {
     id: 2,
     name: "Kalika FM",
-    url: "http://kalika-stream.softnep.com:7740/;",
+    url: "http://kalika-stream.softnep.com:7740/",
     logo: "https://images.pexels.com/photos/3721941/pexels-photo-3721941.jpeg",
     genre: ["News", "Culture"],
     country: "Nepal",
@@ -261,4 +261,15 @@ export function getStationById(id: number) {
 
 export function getStationsByIds(ids: number[]) {
   return stations.filter((station) => ids.includes(station.id));
+}
+
+
+export function getTracks() {
+  return stations.map((station) => ({
+    id: station.id,
+    url: station.url,
+    title: station.name,
+    artwork: station.logo,
+    
+  }));
 }

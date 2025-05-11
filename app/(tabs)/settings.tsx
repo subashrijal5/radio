@@ -27,9 +27,9 @@ export default function SettingsScreen() {
       description:
         theme === "system" ? "System" : theme === "dark" ? "On" : "Off",
       onPress: () => {
-        if (theme === "system") setTheme("dark");
+        if (theme === "system" && systemColorScheme === "dark") setTheme("light");
         else if (theme === "dark") setTheme("light");
-        else setTheme("system");
+        else setTheme("dark");
       },
     },
     {

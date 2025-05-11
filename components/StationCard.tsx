@@ -9,8 +9,10 @@ import {
 import { useRadioStore, Station } from "../store/radioStore";
 import { Ionicons } from "@expo/vector-icons";
 import { useThemeStore } from "@/store/themeStore";
-import { useAudioPlayerStatus } from "expo-audio";
-import { usePlayer } from "./player-context";
+import TrackPlayer, { State } from "react-native-track-player";
+import { useEffect, useState } from "react";
+import { Event } from "react-native-track-player";
+import { getTracks } from "@/services/stations";
 
 interface StationCardProps {
   station: Station;
@@ -24,9 +26,25 @@ export default function StationCard({ station }: StationCardProps) {
     setCurrentStation,
     addToRecentlyPlayed,
   } = useRadioStore();
-  const player = usePlayer();
 
-  const stat = useAudioPlayerStatus(player!);
+  const [state, setState] = useState<State>(State.None);
+  useEffect(() => {
+    async function init() {
+      const state = await TrackPlayer.getPlaybackState();
+      setState(state.state);
+    }
+    init();
+    const removePlaybackStateListener = TrackPlayer.addEventListener(
+      Event.PlaybackState,
+      (state) => {
+        setState(state.state);
+      }
+    );
+    // TODO: Remove event listener
+    return () => {
+      removePlaybackStateListener.remove();
+    };
+  }, []);
 
   const { theme } = useThemeStore();
   const isDark = theme === "dark";
@@ -35,17 +53,34 @@ export default function StationCard({ station }: StationCardProps) {
   const isCurrentStation = currentStation?.id === station.id;
 
   const handlePlayPress = async () => {
-    if (player!.playing && isCurrentStation) {
+    
+    const state = await TrackPlayer.getPlaybackState();
+    if(state.state === State.Buffering) {
+      return;
+    }
+    if(state.state === State.Ready) {
+      TrackPlayer.skip(station.id - 1);
+      await TrackPlayer.play();
+        return;
+    }
+    if (state.state === State.None) {
+      await TrackPlayer.reset();
+      await TrackPlayer.add(getTracks());
+      await TrackPlayer.play();
+      return;
+    }
+
+    if (state.state === State.Playing && currentStation?.id === station.id) {
       setCurrentStation(null);
-      player!.pause();
+      await TrackPlayer.pause();
     } else {
+      addToRecentlyPlayed(station);
+      setCurrentStation(station);
       if (isCurrentStation) {
-        player!.play();
+        await TrackPlayer.play();
       } else {
-        addToRecentlyPlayed(station);
-        setCurrentStation(station);
-        player!.replace(station.url);
-        player!.play();
+        await TrackPlayer.skip(station.id - 1);
+        await TrackPlayer.play();
       }
     }
   };
@@ -81,9 +116,9 @@ export default function StationCard({ station }: StationCardProps) {
           />
         </TouchableOpacity>
         <TouchableOpacity onPress={handlePlayPress} style={styles.button}>
-          {player!.playing && currentStation?.id === station.id ? (
+          {state === State.Playing && currentStation?.id === station.id ? (
             <Ionicons name="pause" size={24} color="#007AFF" />
-          ) : stat.isBuffering && currentStation?.id === station.id ? (
+          ) : state === State.Buffering && currentStation?.id === station.id ? (
             <ActivityIndicator
               size="small"
               color={isDark ? "#ffffff" : "#000000"}

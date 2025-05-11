@@ -6,8 +6,6 @@ import { Ionicons } from "@expo/vector-icons";
 import { stations } from "@/services/stations";
 import { useThemeStore } from "@/store/themeStore";
 
-
-
 export default function BrowseScreen() {
   const [searchQuery, setSearchQuery] = useState("");
   const { theme } = useThemeStore();

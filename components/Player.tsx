@@ -3,23 +3,39 @@ import { useRadioStore } from "../store/radioStore";
 import Slider from "@react-native-community/slider";
 import { Ionicons } from "@expo/vector-icons";
 import { useThemeStore } from "@/store/themeStore";
-import { usePlayer } from "./player-context";
-import { useAudioPlayerStatus } from "expo-audio";
+import TrackPlayer, { State, Event } from "react-native-track-player";
+import { useEffect, useState } from "react";
 
 export default function Player() {
-  const { currentStation, volume, setVolume } = useRadioStore();
-  const player = usePlayer();
-    const stat = useAudioPlayerStatus(player!);
+  const { currentStation, volume } = useRadioStore();
+  const [state, setState] = useState<State>(State.None);
+  useEffect(() => {
+    async function init() {
+      const state = await TrackPlayer.getPlaybackState();
+      setState(state.state);
+    }
+    init();
+    TrackPlayer.addEventListener(Event.PlaybackState, (state) => {
+      setState(state.state);
+    });
+    // TODO: Remove event listener
+    return () => {};
+  }, []);
+
   const { theme } = useThemeStore();
   const isDark = theme === "dark";
 
-  if (!currentStation || !player) return null;
+  if (!currentStation) return null;
   const handlePlayPause = async () => {
-    if (player.playing) {
-      player.pause();
+    if (state === State.Playing) {
+      await TrackPlayer.pause();
     } else {
-      player.play();
+      await TrackPlayer.play();
     }
+  };
+
+  const handleVolume = (value: number) => {
+    TrackPlayer.setVolume(value);
   };
 
   return (
@@ -40,7 +56,7 @@ export default function Player() {
       </View>
       <View style={styles.controls}>
         <View style={styles.volumeControl}>
-          <TouchableOpacity onPress={() => setVolume(volume === 0 ? 1 : 0)}>
+          <TouchableOpacity onPress={() => handleVolume(volume === 0 ? 1 : 0)}>
             {volume === 0 ? (
               <Ionicons
                 name="volume-mute"
@@ -59,8 +75,7 @@ export default function Player() {
             style={styles.slider}
             value={volume}
             onValueChange={async (value) => {
-              // const state = await setAudioVolume(value);
-              // setVolume(state.volume);
+              handleVolume(value);
             }}
             minimumValue={0}
             maximumValue={1}
@@ -70,7 +85,7 @@ export default function Player() {
           />
         </View>
         <TouchableOpacity onPress={handlePlayPause} style={styles.playButton}>
-          {stat.playing ? (
+          {state === State.Playing ? (
             <Ionicons name="pause" size={24} color="#007AFF" />
           ) : (
             <Ionicons name="play" size={24} color="#007AFF" />
