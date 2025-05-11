@@ -6,7 +6,6 @@ import Player from "../../components/Player";
 import { Ionicons } from "@expo/vector-icons";
 
 
-// Mock data with HLS streams that work on web
 const mockStations = [
   {
     id: "1",
