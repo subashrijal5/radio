@@ -50,7 +50,7 @@ export const useRadioStore = create(
             (s) => s.id !== station.id
           );
           return {
-            recentlyPlayed: [station, ...filtered].slice(0, 10),
+            recentlyPlayed: [station, ...filtered].slice(0, 5),
           };
         }),
       setVolume: (volume) => set({ volume }),

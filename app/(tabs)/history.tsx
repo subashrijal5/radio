@@ -2,6 +2,7 @@ import { View, Text, FlatList, StyleSheet } from "react-native";
 import StationCard from "../../components/StationCard";
 import { useThemeStore } from "../../store/themeStore";
 import { useRadioStore } from "../../store/radioStore";
+import Player from "@/components/Player";
 
 export default function HistoryScreen() {
   const { recentlyPlayed } = useRadioStore();
@@ -38,6 +39,7 @@ export default function HistoryScreen() {
           contentContainerStyle={styles.list}
         />
       )}
+      <Player />
     </View>
   );
 }

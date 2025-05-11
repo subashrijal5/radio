@@ -1,8 +1,16 @@
-import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  Image,
+  TouchableOpacity,
+  StyleSheet,
+  ActivityIndicator,
+} from "react-native";
 import { useRadioStore, Station } from "../store/radioStore";
 import { Ionicons } from "@expo/vector-icons";
-import { useAudio } from "@/hooks/useAudio";
 import { useThemeStore } from "@/store/themeStore";
+import { useAudioPlayerStatus } from "expo-audio";
+import { usePlayer } from "./player-context";
 
 interface StationCardProps {
   station: Station;
@@ -11,16 +19,14 @@ interface StationCardProps {
 export default function StationCard({ station }: StationCardProps) {
   const {
     currentStation,
-    isPlaying,
     favorites,
     toggleFavorite,
     setCurrentStation,
-    setIsPlaying,
-    setVolume,
-    volume,
     addToRecentlyPlayed,
   } = useRadioStore();
-  const { playAudio, stopAudio } = useAudio();
+  const player = usePlayer();
+
+  const stat = useAudioPlayerStatus(player!);
 
   const { theme } = useThemeStore();
   const isDark = theme === "dark";
@@ -29,17 +35,17 @@ export default function StationCard({ station }: StationCardProps) {
   const isCurrentStation = currentStation?.id === station.id;
 
   const handlePlayPress = async () => {
-    if (isCurrentStation && isPlaying) {
-      const state = await stopAudio();
-      setIsPlaying(state.isPlaying);
-      setVolume(state.volume);
+    if (player!.playing && isCurrentStation) {
+      setCurrentStation(null);
+      player!.pause();
     } else {
-      setCurrentStation(station);
-      const state = await playAudio(station.url, volume);
-      if (state.isPlaying) {
-        setIsPlaying(state.isPlaying);
-        setVolume(state.volume);
+      if (isCurrentStation) {
+        player!.play();
+      } else {
         addToRecentlyPlayed(station);
+        setCurrentStation(station);
+        player!.replace(station.url);
+        player!.play();
       }
     }
   };
@@ -75,8 +81,13 @@ export default function StationCard({ station }: StationCardProps) {
           />
         </TouchableOpacity>
         <TouchableOpacity onPress={handlePlayPress} style={styles.button}>
-          {isCurrentStation && isPlaying ? (
+          {player!.playing && currentStation?.id === station.id ? (
             <Ionicons name="pause" size={24} color="#007AFF" />
+          ) : stat.isBuffering && currentStation?.id === station.id ? (
+            <ActivityIndicator
+              size="small"
+              color={isDark ? "#ffffff" : "#000000"}
+            />
           ) : (
             <Ionicons name="play" size={24} color="#007AFF" />
           )}
@@ -128,4 +139,5 @@ const styles = StyleSheet.create({
   button: {
     padding: 8,
   },
+  spinner: {},
 });

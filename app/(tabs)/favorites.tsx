@@ -1,22 +1,33 @@
-import { View, Text, FlatList, StyleSheet } from 'react-native';
-import { useRadioStore } from '../../store/radioStore';
-import StationCard from '../../components/StationCard';
-import { useThemeStore } from '../../store/themeStore';
+import { View, Text, FlatList, StyleSheet } from "react-native";
+import { useRadioStore } from "../../store/radioStore";
+import StationCard from "../../components/StationCard";
+import { useThemeStore } from "../../store/themeStore";
+import Player from "@/components/Player";
 
 export default function FavoritesScreen() {
   const { favorites } = useRadioStore();
   const { theme } = useThemeStore();
-  const isDark = theme === 'dark';
+  const isDark = theme === "dark";
 
   return (
-    <View style={[styles.container, { backgroundColor: isDark ? '#000000' : '#f2f2f7' }]}>
-      <Text style={[styles.title, { color: isDark ? '#ffffff' : '#000000' }]}>
+    <View
+      style={[
+        styles.container,
+        { backgroundColor: isDark ? "#000000" : "#f2f2f7" },
+      ]}
+    >
+      <Text style={[styles.title, { color: isDark ? "#ffffff" : "#000000" }]}>
         Favorite Stations
       </Text>
       {favorites.length === 0 ? (
         <View style={styles.emptyState}>
-          <Text style={[styles.emptyText, { color: isDark ? '#888888' : '#666666' }]}>
-            No favorite stations yet.{'\n'}Add some from the Browse tab!
+          <Text
+            style={[
+              styles.emptyText,
+              { color: isDark ? "#888888" : "#666666" },
+            ]}
+          >
+            No favorite stations yet.{"\n"}Add some from the Browse tab!
           </Text>
         </View>
       ) : (
@@ -27,6 +38,7 @@ export default function FavoritesScreen() {
           contentContainerStyle={styles.list}
         />
       )}
+      <Player />
     </View>
   );
 }
@@ -38,7 +50,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 28,
-    fontWeight: '700',
+    fontWeight: "700",
     marginBottom: 20,
     paddingHorizontal: 16,
   },
@@ -47,13 +59,13 @@ const styles = StyleSheet.create({
   },
   emptyState: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     paddingHorizontal: 32,
   },
   emptyText: {
     fontSize: 16,
-    textAlign: 'center',
+    textAlign: "center",
     lineHeight: 24,
   },
 });
