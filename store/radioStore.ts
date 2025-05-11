@@ -65,9 +65,9 @@ export const useRadioStore = create<RadioState>((set, get) => ({
         staysActiveInBackground: true,
         playsInSilentModeIOS: true,
         // Ensure web compatibility
-        ...(Platform.OS === 'web' ? {
-          interruptionModeWeb: Audio.INTERRUPTION_MODE_IOS_DO_NOT_MIX,
-        } : {}),
+        // ...(Platform.OS === 'web' ? {
+        //   interruptionModeWeb: Audio.INTERRUPTION_MODE_IOS_DO_NOT_MIX,
+        // } : {}),
       });
 
       // Create and load the audio

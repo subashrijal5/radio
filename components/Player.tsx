@@ -38,14 +38,13 @@ export default function Player() {
         <View style={styles.volumeControl}>
           <TouchableOpacity onPress={() => setVolume(volume === 0 ? 1 : 0)}>
             {volume === 0 ? (
-              <Ionicons name="volume-high-outline" size={20} color={isDark ? '#ffffff' : '#000000'} />
+              <Ionicons name="volume-mute" size={20} color={isDark ? '#ffffff' : '#000000'} />
             ) : (
-              <Ionicons name="volume-low-outline" size={20} color={isDark ? '#ffffff' : '#000000'} />
+              <Ionicons name="volume-high-outline" size={20} color={isDark ? '#ffffff' : '#000000'} />
             )}
           </TouchableOpacity>
           <Slider
             style={styles.slider}
-            value={volume}
             onValueChange={setVolume}
             minimumValue={0}
             maximumValue={1}
